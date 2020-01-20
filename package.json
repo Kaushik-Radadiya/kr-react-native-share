@@ -4,7 +4,7 @@
   "version": "1.2.1",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/react-native-community/kr-react-native-share.git"
+    "url": "git+https://github.com/Kaushik-Radadiya/kr-react-native-share.git"
   },
   "devDependencies": {
     "@commitlint/cli": "6.2.0",
@@ -39,11 +39,7 @@
     "share"
   ],
   "nativePackage": true,
-  "author": {
-    "name": "Esteban Fuentealba",
-    "email": "efuentealba@json.cl"
-  },
-  "homepage": "https://github.com/react-native-community/kr-react-native-share#readme",
+  "homepage": "https://github.com/Kaushik-Radadiya/kr-react-native-share#readme",
   "license": "MIT",
   "lint-staged": {
     "*.js": [
