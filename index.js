@@ -5,7 +5,7 @@
  *
  */
 
-import * as React from 'react';
+import * as React from "react";
 import {
   View,
   StyleSheet,
@@ -14,27 +14,27 @@ import {
   NativeModules,
   Platform,
   ActionSheetIOS,
-  PermissionsAndroid,
-} from 'react-native';
+  PermissionsAndroid
+} from "react-native";
 
-import Overlay from './components/Overlay';
-import Sheet from './components/Sheet';
-import Button from './components/Button';
+import Overlay from "./components/Overlay";
+import Sheet from "./components/Sheet";
+import Button from "./components/Button";
 
 const styles = StyleSheet.create({
   actionSheetContainer: {
     flex: 1,
     paddingTop: 10,
     paddingBottom: 0,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0, 0, 0, 0.5)"
   },
   buttonContainer: {
-    overflow: 'hidden',
-    backgroundColor: 'white',
+    overflow: "hidden",
+    backgroundColor: "white",
     paddingBottom: 5,
-    paddingTop: 5,
-  },
+    paddingTop: 5
+  }
 });
 
 type Props = {
@@ -42,21 +42,21 @@ type Props = {
   onCancel: () => void,
   children: React.Node,
   style?: {},
-  overlayStyle?: {},
+  overlayStyle?: {}
 };
 
-const shareSheetStyle = {flex: 1};
+const shareSheetStyle = { flex: 1 };
 
 class ShareSheet extends React.Component<Props> {
   backButtonHandler: () => boolean;
 
   componentDidMount() {
     this.backButtonHandler = this.backButtonHandler.bind(this);
-    BackHandler.addEventListener('backPress', this.backButtonHandler);
+    BackHandler.addEventListener("backPress", this.backButtonHandler);
   }
 
   componentWillUnmount() {
-    BackHandler.removeEventListener('backPress', this.backButtonHandler);
+    BackHandler.removeEventListener("backPress", this.backButtonHandler);
   }
 
   backButtonHandler() {
@@ -67,7 +67,7 @@ class ShareSheet extends React.Component<Props> {
     return false;
   }
   render() {
-    const {style = {}, overlayStyle = {}, ...props} = this.props;
+    const { style = {}, overlayStyle = {}, ...props } = this.props;
     return (
       <Overlay visible={this.props.visible} {...props}>
         <View style={[styles.actionSheetContainer, overlayStyle]}>
@@ -95,7 +95,7 @@ type Options = {
   subject?: string,
   excludedActivityTypes?: string,
   failOnCancel?: boolean,
-  showAppsToView?: boolean,
+  showAppsToView?: boolean
 };
 type MultipleOptions = {
   url?: string,
@@ -106,16 +106,16 @@ type MultipleOptions = {
   subject?: string,
   excludedActivityTypes?: string,
   failOnCancel?: boolean,
-  showAppsToView?: boolean,
+  showAppsToView?: boolean
 };
 
-type OpenReturn = {app?: string, dismissedAction?: boolean};
-type ShareSingleReturn = {message: string};
+type OpenReturn = { app?: string, dismissedAction?: boolean };
+type ShareSingleReturn = { message: string };
 
 const requireAndAskPermissions = async (
-  options: Options | MultipleOptions,
+  options: Options | MultipleOptions
 ): Promise<any> => {
-  if ((options.url || options.urls) && Platform.OS === 'android') {
+  if ((options.url || options.urls) && Platform.OS === "android") {
     const urls: Array<string> = options.urls || [options.url];
     try {
       const resultArr = await Promise.all(
@@ -129,10 +129,10 @@ const requireAndAskPermissions = async (
                 },
                 isBase64 => {
                   res(isBase64);
-                },
+                }
               );
-            }),
-        ),
+            })
+        )
       );
 
       const requirePermission = resultArr.includes(true);
@@ -140,18 +140,18 @@ const requireAndAskPermissions = async (
         return Promise.resolve(true);
       }
       const hasPermission = await PermissionsAndroid.check(
-        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE
       );
       if (hasPermission) {
         return Promise.resolve(true);
       }
       const result = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE
       );
       if (result === PermissionsAndroid.RESULTS.GRANTED) {
         return Promise.resolve();
       }
-      throw new Error('Write Permission not available');
+      throw new Error("Write Permission not available");
     } catch (e) {
       return Promise.reject(e);
     }
@@ -165,111 +165,96 @@ class RNShare {
   static Overlay: any;
   static Sheet: any;
   static Social = {
-    FACEBOOK: NativeModules.RNShare.FACEBOOK || 'facebook',
-    PAGESMANAGER: NativeModules.RNShare.PAGESMANAGER || 'pagesmanager',
-    TWITTER: NativeModules.RNShare.TWITTER || 'twitter',
-    WHATSAPP: NativeModules.RNShare.WHATSAPP || 'whatsapp',
-    INSTAGRAM: NativeModules.RNShare.INSTAGRAM || 'instagram',
-    GOOGLEPLUS: NativeModules.RNShare.GOOGLEPLUS || 'googleplus',
-    EMAIL: NativeModules.RNShare.EMAIL || 'email',
-    PINTEREST: NativeModules.RNShare.PINTEREST || 'pinterest',
+    FACEBOOK: NativeModules.RNShare.FACEBOOK || "facebook",
+    PAGESMANAGER: NativeModules.RNShare.PAGESMANAGER || "pagesmanager",
+    TWITTER: NativeModules.RNShare.TWITTER || "twitter",
+    WHATSAPP: NativeModules.RNShare.WHATSAPP || "whatsapp",
+    INSTAGRAM: NativeModules.RNShare.INSTAGRAM || "instagram",
+    GOOGLEPLUS: NativeModules.RNShare.GOOGLEPLUS || "googleplus",
+    EMAIL: NativeModules.RNShare.EMAIL || "email",
+    PINTEREST: NativeModules.RNShare.PINTEREST || "pinterest"
   };
 
   static open(options: Options | MultipleOptions): Promise<OpenReturn> {
     return new Promise((resolve, reject) => {
       requireAndAskPermissions(options)
         .then(() => {
-          if (Platform.OS === 'ios' && !options.urls) {
-            // Handle for single file share
-            ActionSheetIOS.showShareActionSheetWithOptions(
-              options,
-              error => {
-                return reject({error: error});
-              },
-              (success, activityType) => {
-                if (success) {
-                  return resolve({
-                    app: activityType,
-                  });
-                } else if (options.failOnCancel === false) {
-                  return resolve({
-                    dismissedAction: true,
-                  });
-                } else {
-                  reject(new Error('User did not share'));
-                }
-              },
-            );
-          } else {
-            NativeModules.RNShare.open(
-              options,
-              e => {
-                return reject({error: e});
-              },
-              (success, activityType) => {
-                if (success) {
-                  return resolve({
-                    app: activityType,
-                    message: activityType,
-                  });
-                } else if (options.failOnCancel === false) {
-                  return resolve({
-                    dismissedAction: true,
-                  });
-                } else {
-                  reject(new Error('User did not share'));
-                }
-              },
-            );
+          if (options.url && !options.urls) {
+            // Backward compatibility with { Share } from react-native
+            const url = options.url;
+            delete options.url;
+
+            options.urls = [url];
           }
+
+          NativeModules.RNShare.open(
+            options,
+            e => {
+              return reject({ error: e });
+            },
+            (success, activityType) => {
+              if (success) {
+                return resolve({
+                  app: activityType,
+                  message: activityType
+                });
+              } else if (options.failOnCancel === false) {
+                return resolve({
+                  dismissedAction: true
+                });
+              } else {
+                reject(new Error("User did not share"));
+              }
+            }
+          );
         })
         .catch(e => reject(e));
     });
   }
-
+  
   static shareSingle(options: Options): Promise<ShareSingleReturn> {
-    if (Platform.OS === 'ios' || Platform.OS === 'android') {
+    if (Platform.OS === "ios" || Platform.OS === "android") {
       return new Promise((resolve, reject) => {
         requireAndAskPermissions(options)
           .then(() => {
             NativeModules.RNShare.shareSingle(
               options,
               e => {
-                return reject({error: e});
+                return reject({ error: e });
               },
               (e, activityType) => {
                 return resolve({
                   message: e,
-                  app: activityType,
+                  app: activityType
                 });
-              },
+              }
             );
           })
           .catch(e => reject(e));
       });
     } else {
-      throw new Error('Not implemented');
+      throw new Error("Not implemented");
     }
   }
 
   static isPackageInstalled(packageName: string): Promise<ShareSingleReturn> {
-    if (Platform.OS === 'android') {
+    if (Platform.OS === "android") {
       return new Promise((resolve, reject) => {
         NativeModules.RNShare.isPackageInstalled(
           packageName,
           e => {
-            return reject({error: e});
+            return reject({ error: e });
           },
           isInstalled => {
             return resolve({
               isInstalled: isInstalled,
-              message: 'Package is Installed',
+              message: "Package is Installed"
             });
-          },
+          }
         );
       });
     } else {
-      throw new Error('Not implemented');
+      throw new Error("Not implemented");
     }
   }
 }
